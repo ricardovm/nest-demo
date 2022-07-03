@@ -1,21 +1,31 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { CreateCatDto } from './create-cat.dto';
+import { CatsService } from './cats.service';
+import { Cat } from './interfaces/cat.interface';
 
 @Controller('cats')
 export class CatsController {
+  constructor(private catsService: CatsService) {}
+
   @Post()
   async create(@Body() createCatDto: CreateCatDto) {
-    return `This action adds a new cat: ${JSON.stringify(createCatDto)}`;
+    this.catsService.create(createCatDto);
   }
 
   @Get(':id')
-  findOne(@Param() params): string {
-    console.log(params.id);
-    return `This action returns a #${params.id} cat`;
+  findOne(@Res({ passthrough: true }) res: Response, @Param() params) {
+    let cat = this.catsService.get(params.id);
+
+    if (cat == null) {
+      res.status(HttpStatus.NOT_FOUND).send();
+    } else {
+      res.status(HttpStatus.OK).json(cat);
+    }
   }
 
   @Get()
-  findAll(): string {
-    return 'This action returns all cats';
+  async findAll(): Promise<Cat[]> {
+    return this.catsService.findAll();
   }
 }
