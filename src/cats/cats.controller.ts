@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Res } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpException, HttpStatus, Param, Post, Res, UseFilters } from '@nestjs/common';
 import { Response } from 'express';
 import { CreateCatDto } from './dto/create-cat.dto';
 import { CatsService } from './cats.service';
@@ -27,5 +27,15 @@ export class CatsController {
   @Get()
   async findAll(): Promise<Cat[]> {
     return this.catsService.findAll();
+  }
+
+  @Get('/get/error')
+  async getError(): Promise<Cat[]> {
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  }
+
+  @Get('/get/error2')
+  async getError2(): Promise<Cat[]> {
+    throw new BadRequestException('Oh no! Bad request!');
   }
 }
